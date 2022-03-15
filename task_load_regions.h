@@ -12,9 +12,9 @@ class task_load_regions
 // data
 // methods
 private:
-	void _finish() override;
+	void _apply_raw_data(vector<char>&& data) override;
 
-	static vector<int> _to_ints(const vector<char>& data);
+	static vector<long long> _to_ints(const vector<char>& data);
 
 public:
 	task_load_regions();

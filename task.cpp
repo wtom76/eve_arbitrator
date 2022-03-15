@@ -7,6 +7,8 @@ task::task()
 {
 	curl_easy_setopt(eh_.handle(), CURLOPT_WRITEFUNCTION, exec);
 	curl_easy_setopt(eh_.handle(), CURLOPT_WRITEDATA, static_cast<void*>(this));
+
+	curl_easy_setopt(eh_.handle(), CURLOPT_VERBOSE, 1);
 }
 //---------------------------------------------------------------------------------------------------------
 task::~task()
@@ -33,8 +35,8 @@ void task::deactivate()
 void task::_exec(char* data, size_t n, size_t l)
 {
 	const size_t prev_size{raw_data_.size()};
-	raw_data_.resize(raw_data_.size() + n * l);
-	copy(data, data + n * l, raw_data_.data());
+	raw_data_.resize(prev_size + n * l);
+	copy(data, data + n * l, raw_data_.data() + prev_size);
 }
 //---------------------------------------------------------------------------------------------------------
 void task::exec(char* data, size_t n, size_t l, void* userp)
@@ -44,5 +46,6 @@ void task::exec(char* data, size_t n, size_t l, void* userp)
 //---------------------------------------------------------------------------------------------------------
 void task::finish()
 {
-	_finish();
+	_apply_raw_data(move(raw_data_));
+	raw_data_.clear();
 }

@@ -18,11 +18,11 @@ protected:
 private:
 	void _exec(char* data, size_t n, size_t l);
 
-	virtual void _finish() = 0;
+	virtual void _apply_raw_data(vector<char>&& data) = 0;
 
 public:
 	task();
-	~task();
+	virtual ~task();
 	void activate(shared_ptr<curl_multi> multi_handle);
 	void deactivate();
 	CURL* handle() const noexcept { return eh_.handle(); }

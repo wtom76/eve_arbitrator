@@ -4,6 +4,7 @@
 #include <charconv>
 #include <cctype>
 #include "task_load_regions.h"
+#include "task_load_orders.h"
 #include "context.h"
 
 //---------------------------------------------------------------------------------------------------------
@@ -12,20 +13,23 @@ task_load_regions::task_load_regions()
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, "https://esi.evetech.net/dev/universe/regions/?datasource=tranquility");
 }
 //---------------------------------------------------------------------------------------------------------
-void task_load_regions::_finish()
+void task_load_regions::_apply_raw_data(vector<char>&& data)
 {
 	cout << "task_load_regions done" << endl;
 
 	fstream f{"regions.dump", ios::out|ios::binary|ios::trunc};
-	f.write(raw_data_.data(), raw_data_.size());
-	ctx().set_region_ids(_to_ints(raw_data_));
-	raw_data_.clear();
+	f.write(data.data(), data.size());
+	ctx().set_region_ids(_to_ints(data));
+	if (!ctx().region_ids().empty())
+	{
+		ctx().add_task(make_shared<task_load_orders>(0));
+	}
 }
 //---------------------------------------------------------------------------------------------------------
 /// 1. find number position
-vector<int> task_load_regions::_to_ints(const vector<char>& data)
+vector<long long> task_load_regions::_to_ints(const vector<char>& data)
 {
-	vector<int> result;
+	vector<long long> result;
 
 	if (data.size() <= 1)
 	{
@@ -47,7 +51,7 @@ vector<int> task_load_regions::_to_ints(const vector<char>& data)
 		{
 			++num_end;
 		}
-		int val{0};
+		long long val{0};
 		const from_chars_result res{from_chars(num_begin, num_end, val)};
 		if (res.ec != std::errc{})
 		{
@@ -64,4 +68,6 @@ vector<int> task_load_regions::_to_ints(const vector<char>& data)
 		result.emplace_back(val);
 		cout << "region id: " << val << endl;
 	}
+
+	return result;
 }
