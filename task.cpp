@@ -30,11 +30,16 @@ void task::deactivate()
 	}
 }
 //---------------------------------------------------------------------------------------------------------
-void task::exec(char* data, size_t n, size_t l, void* userp)
+void task::_exec(char* data, size_t n, size_t l)
 {
 	const size_t prev_size{raw_data_.size()};
 	raw_data_.resize(raw_data_.size() + n * l);
 	copy(data, data + n * l, raw_data_.data());
+}
+//---------------------------------------------------------------------------------------------------------
+void task::exec(char* data, size_t n, size_t l, void* userp)
+{
+	static_cast<task*>(userp)->_exec(data, n, l);
 }
 //---------------------------------------------------------------------------------------------------------
 void task::finish()

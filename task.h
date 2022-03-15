@@ -16,6 +16,8 @@ protected:
 
 // methods
 private:
+	void _exec(char* data, size_t n, size_t l);
+
 	virtual void _finish() = 0;
 
 public:
