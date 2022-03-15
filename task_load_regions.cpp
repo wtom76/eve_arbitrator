@@ -13,7 +13,7 @@ task_load_regions::task_load_regions()
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, "https://esi.evetech.net/dev/universe/regions/?datasource=tranquility");
 }
 //---------------------------------------------------------------------------------------------------------
-void task_load_regions::_apply_raw_data(vector<char>&& data)
+shared_ptr<task> task_load_regions::_apply_raw_data(vector<char>&& data)
 {
 	cout << "task_load_regions done" << endl;
 
@@ -22,8 +22,9 @@ void task_load_regions::_apply_raw_data(vector<char>&& data)
 	ctx().set_region_ids(_to_ints(data));
 	if (!ctx().region_ids().empty())
 	{
-		ctx().add_task(make_shared<task_load_orders>(0));
+		return make_shared<task_load_orders>(0);
 	}
+	return {};
 }
 //---------------------------------------------------------------------------------------------------------
 /// 1. find number position

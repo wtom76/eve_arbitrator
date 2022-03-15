@@ -12,7 +12,7 @@ class task_load_regions
 // data
 // methods
 private:
-	void _apply_raw_data(vector<char>&& data) override;
+	shared_ptr<task> _apply_raw_data(vector<char>&& data) override;
 
 	static vector<long long> _to_ints(const vector<char>& data);
 

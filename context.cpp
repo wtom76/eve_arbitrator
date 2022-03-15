@@ -27,8 +27,7 @@ void context::_run()
 	while (!tasks_.empty())
 	{
 		int still_alive{0};
-		const CURLMcode res{curl_multi_perform(multi_handle_->handle(), &still_alive)};
-		cout << "still_alive: " << still_alive << " res: " << res << endl;
+		curl_multi_perform(multi_handle_->handle(), &still_alive);
 
 		int msgs_left{0};
 		while (CURLMsg* msg{curl_multi_info_read(multi_handle_->handle(), &msgs_left)})
@@ -42,13 +41,17 @@ void context::_run()
 				}
 				else
 				{
-					task_i->second->finish();
+					shared_ptr<task> next_task{task_i->second->finish()};
 					tasks_.erase(task_i);
+					if (next_task)
+					{
+						add_task(move(next_task));
+					}
 				}
 				cout << "done" << endl;
 			}
 		}
-        if (still_alive)
+        if (!tasks_.empty())
         {
             curl_multi_wait(multi_handle_->handle(), nullptr, 0, 1000, nullptr);
         }

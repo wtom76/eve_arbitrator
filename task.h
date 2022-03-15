@@ -18,7 +18,7 @@ protected:
 private:
 	void _exec(char* data, size_t n, size_t l);
 
-	virtual void _apply_raw_data(vector<char>&& data) = 0;
+	virtual shared_ptr<task> _apply_raw_data(vector<char>&& data) = 0;
 
 public:
 	task();
@@ -27,7 +27,7 @@ public:
 	void deactivate();
 	CURL* handle() const noexcept { return eh_.handle(); }
 
-	static void exec(char* data, size_t n, size_t l, void* userp);
+	static size_t exec(char* data, size_t n, size_t l, void* userp);
 
-	void finish();
+	shared_ptr<task> finish();
 };

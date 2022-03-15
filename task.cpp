@@ -8,7 +8,7 @@ task::task()
 	curl_easy_setopt(eh_.handle(), CURLOPT_WRITEFUNCTION, exec);
 	curl_easy_setopt(eh_.handle(), CURLOPT_WRITEDATA, static_cast<void*>(this));
 
-	curl_easy_setopt(eh_.handle(), CURLOPT_VERBOSE, 1);
+//	curl_easy_setopt(eh_.handle(), CURLOPT_VERBOSE, 1);
 }
 //---------------------------------------------------------------------------------------------------------
 task::~task()
@@ -19,6 +19,8 @@ task::~task()
 void task::activate(shared_ptr<curl_multi> multi_handle)
 {
 	assert(!multi_handle_);
+	assert(raw_data_.empty());
+
 	multi_handle_ = move(multi_handle);
 	curl_multi_add_handle(multi_handle_->handle(), eh_.handle());
 }
@@ -39,13 +41,13 @@ void task::_exec(char* data, size_t n, size_t l)
 	copy(data, data + n * l, raw_data_.data() + prev_size);
 }
 //---------------------------------------------------------------------------------------------------------
-void task::exec(char* data, size_t n, size_t l, void* userp)
+size_t task::exec(char* data, size_t n, size_t l, void* userp)
 {
 	static_cast<task*>(userp)->_exec(data, n, l);
+	return n * l;
 }
 //---------------------------------------------------------------------------------------------------------
-void task::finish()
+shared_ptr<task> task::finish()
 {
-	_apply_raw_data(move(raw_data_));
-	raw_data_.clear();
+	return _apply_raw_data(move(raw_data_));
 }
