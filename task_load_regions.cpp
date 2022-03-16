@@ -8,9 +8,12 @@
 #include "context.h"
 
 //---------------------------------------------------------------------------------------------------------
-task_load_regions::task_load_regions()
+task_load_regions::task_load_regions(int page)
+	: page_{page}
 {
-	curl_easy_setopt(eh_.handle(), CURLOPT_URL, "https://esi.evetech.net/dev/universe/regions/?datasource=tranquility");
+	const string url{ctx().esi_subdir() + "/universe/regions/?datasource=" + ctx().esi_datasource()};
+	cout << "regions url " << url << endl;
+	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.c_str());
 }
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_regions::_apply_raw_data(vector<char>&& data)
@@ -19,10 +22,14 @@ shared_ptr<task> task_load_regions::_apply_raw_data(vector<char>&& data)
 
 	fstream f{"regions.dump", ios::out|ios::binary|ios::trunc};
 	f.write(data.data(), data.size());
-	ctx().set_region_ids(_to_ints(data));
+	ctx().add_region_ids(_to_ints(data));
+	if (page_ < pages_)
+	{
+		return make_shared<task_load_regions>(page_ + 1);
+	}
 	if (!ctx().region_ids().empty())
 	{
-		return make_shared<task_load_orders>(0);
+		return make_shared<task_load_orders>(0, 1);
 	}
 	return {};
 }

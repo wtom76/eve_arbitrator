@@ -10,7 +10,8 @@ class task_load_orders
 {
 // data
 private:
-	long long region_idx_{0};
+	long long	region_idx_{0};
+	int			page_{0};
 // methods
 private:
 	long long region_id() const noexcept;
@@ -18,5 +19,5 @@ private:
 
 public:
 	/// region_idx is an index in context::region_ids() vector. not region_id itself.
-	explicit task_load_orders(long long region_idx);
+	task_load_orders(long long region_idx, int page);
 };

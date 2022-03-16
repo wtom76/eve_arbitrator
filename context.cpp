@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <algorithm>
 #include "context.h"
 #include "task_load_regions.h"
 
@@ -14,15 +15,32 @@ context::context()
 	: multi_handle_{make_shared<curl_multi>()}
 {}
 //---------------------------------------------------------------------------------------------------------
+const string& context::esi_subdir() const noexcept
+{
+	static string str{"https://esi.evetech.net/dev"};
+	return str;
+}
+//---------------------------------------------------------------------------------------------------------
+const string& context::esi_datasource() const noexcept
+{
+	static string str{"tranquility"};
+	return str;
+}
+//---------------------------------------------------------------------------------------------------------
 void context::add_task(shared_ptr<task> task)
 {
 	tasks_.emplace(task->handle(), task);
 	task->activate(multi_handle_);
 }
 //---------------------------------------------------------------------------------------------------------
+void context::_clear()
+{
+	region_ids_.clear();
+}
+//---------------------------------------------------------------------------------------------------------
 void context::_run()
 {
-	add_task(make_shared<task_load_regions>());
+	add_task(make_shared<task_load_regions>(1));
 
 	while (!tasks_.empty())
 	{
@@ -48,22 +66,30 @@ void context::_run()
 						add_task(move(next_task));
 					}
 				}
-				cout << "done" << endl;
 			}
 		}
         if (!tasks_.empty())
         {
             curl_multi_wait(multi_handle_->handle(), nullptr, 0, 1000, nullptr);
         }
-    }
+	}
+	cout << "done" << endl;
 }
 //---------------------------------------------------------------------------------------------------------
 void context::start()
 {
+	_clear();
 	_run();
 }
 //---------------------------------------------------------------------------------------------------------
 void context::apply_orders(long long region_id, vector<order>&& orders)
 {
 	printf("orders from region %lld. count %lu\n", region_id, orders.size());
+}
+//---------------------------------------------------------------------------------------------------------
+void context::add_region_ids(vector<long long>&& ids)
+{
+	const size_t prev_size{region_ids_.size()};
+	region_ids_.resize(prev_size + ids.size());
+	copy(ids.begin(), ids.end(), next(region_ids_.begin(), prev_size));
 }
