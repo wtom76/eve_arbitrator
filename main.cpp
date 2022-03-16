@@ -1,7 +1,5 @@
-#include <iostream>
+#include "pch.h"
 #include "context.h"
-
-using namespace std;
 
 int main()
 {

@@ -1,5 +1,4 @@
-﻿#include <iostream>
-#include <algorithm>
+﻿#include "pch.h"
 #include "context.h"
 #include "task_load_regions.h"
 
@@ -36,6 +35,7 @@ void context::add_task(shared_ptr<task> task)
 void context::_clear()
 {
 	region_ids_.clear();
+	anomaly_sensor_.clear();
 }
 //---------------------------------------------------------------------------------------------------------
 void context::_run()
@@ -85,6 +85,7 @@ void context::start()
 void context::apply_orders(long long region_id, vector<order>&& orders)
 {
 	printf("orders from region %lld. count %lu\n", region_id, orders.size());
+	anomaly_sensor_.apply_orders(orders);
 }
 //---------------------------------------------------------------------------------------------------------
 void context::add_region_ids(vector<long long>&& ids)

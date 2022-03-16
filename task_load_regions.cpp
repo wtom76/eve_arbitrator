@@ -1,8 +1,4 @@
-#include <iostream>
-#include <algorithm>
-#include <fstream>
-#include <charconv>
-#include <cctype>
+#include "pch.h"
 #include "task_load_regions.h"
 #include "task_load_orders.h"
 #include "context.h"

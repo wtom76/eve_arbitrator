@@ -1,11 +1,7 @@
 ﻿#pragma once
-#include <unordered_map>
-#include <vector>
-#include <memory>
 #include "handles.h"
 #include "order.h"
-
-using namespace std;
+#include "anomaly_sensor.h"
 
 class task;
 
@@ -23,6 +19,7 @@ private:
 	shared_ptr<curl_multi>	multi_handle_{nullptr};
 	tasks_t					tasks_;
 	vector<long long>		region_ids_;
+	anomaly_sensor			anomaly_sensor_;
 
 	void _clear();
 	void _run();

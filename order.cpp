@@ -1,7 +1,4 @@
-#include <vector>
 #include "order.h"
-
-using namespace std;
 
 //---------------------------------------------------------------------------------------------------------
 void from_json(const nlohmann::json& j, order& dst)
