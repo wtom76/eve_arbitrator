@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "anomaly_sensor.h"
+#include "context.h"
 
 //---------------------------------------------------------------------------------------------------------
 void anomaly_sensor::clear()
@@ -45,6 +46,10 @@ void anomaly_sensor::_check_profit(const item_market& market) const
 
 	if (market.best_ask_.price_ < market.best_bid_.price_)
 	{
-		cout << "FOUND PROFIT. type_id: " << market.best_bid_.type_id_ << " ask: " << market.best_ask_.price_ << " bid: " << market.best_bid_.price_ << endl;
+		cout << "FOUND PROFIT. type_id: " << market.best_bid_.type_id_
+			 << " ask: " << market.best_ask_.price_
+			 << " bid: " << market.best_bid_.price_
+			 << "\t" << ctx().type_by_id(market.best_bid_.type_id_).name_
+			 << endl;
 	}
 }

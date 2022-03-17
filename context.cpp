@@ -36,6 +36,8 @@ void context::_clear()
 {
 	region_ids_.clear();
 	anomaly_sensor_.clear();
+	type_ids_.clear();
+	type_dict_.clear();
 }
 //---------------------------------------------------------------------------------------------------------
 void context::_run()
@@ -82,15 +84,43 @@ void context::start()
 	_run();
 }
 //---------------------------------------------------------------------------------------------------------
+void context::add_type_ids(const vector<long long>& ids)
+{
+	type_ids_.insert(type_ids_.end(), ids.begin(), ids.end());
+
+	{
+		ofstream f{"dumps/types.dump", ios::binary|ios::trunc};
+		for (long long id : type_ids_)
+		{
+			f << id << '\n';
+		}
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+void context::set_type(type&& t)
+{
+	cout << "type_id: " << t.type_id_ << "\tname: " << t.name_ << endl;
+	type_dict_.emplace(t.type_id_, t);
+}
+//---------------------------------------------------------------------------------------------------------
+const type& context::type_by_id(long long type_id) const noexcept
+{
+	static const type null{};
+	const auto type_i{type_dict_.find(type_id)};
+	if (type_i == type_dict_.cend())
+	{
+		return null;
+	}
+	return type_i->second;
+}
+//---------------------------------------------------------------------------------------------------------
+void context::add_region_ids(const vector<long long>& ids)
+{
+	region_ids_.insert(region_ids_.end(), ids.begin(), ids.end());
+}
+//---------------------------------------------------------------------------------------------------------
 void context::apply_orders(long long region_id, vector<order>&& orders)
 {
 	printf("orders from region %lld. count %lu\n", region_id, orders.size());
 	anomaly_sensor_.apply_orders(orders);
-}
-//---------------------------------------------------------------------------------------------------------
-void context::add_region_ids(vector<long long>&& ids)
-{
-	const size_t prev_size{region_ids_.size()};
-	region_ids_.resize(prev_size + ids.size());
-	copy(ids.begin(), ids.end(), next(region_ids_.begin(), prev_size));
 }

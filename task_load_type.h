@@ -1,21 +1,23 @@
 #pragma once
 #include "task.h"
+#include "type.h"
 
 //---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------
-class task_load_orders
+class task_load_type
 	: public task
 {
 // data
 private:
-	long long	region_idx_{0};
+	long long	type_idx_{0};
+	type		type_;
 
 // methods
 private:
-	long long region_id() const noexcept;
+	long long type_id() const noexcept;
 	shared_ptr<task> _apply_raw_data(vector<char>&& data) override;
 
 public:
 	/// region_idx is an index in context::region_ids() vector. not region_id itself.
-	task_load_orders(long long region_idx, int page);
+	explicit task_load_type(long long type_idx, int page);
 };

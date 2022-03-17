@@ -10,7 +10,8 @@ protected:
 	curl_easy				eh_;
 	shared_ptr<curl_multi>	multi_handle_{nullptr};
 	vector<char>			raw_data_;
-	int						pages_{1};
+	int						pages_{numeric_limits<int>::max()};
+	int						page_{1};
 
 // methods
 private:
@@ -19,8 +20,11 @@ private:
 
 	virtual shared_ptr<task> _apply_raw_data(vector<char>&& data) = 0;
 
+protected:
+	bool _is_page_empty(const vector<char>& data) const noexcept;
+
 public:
-	task();
+	task(int page);
 	virtual ~task();
 	void activate(shared_ptr<curl_multi> multi_handle);
 	void deactivate();

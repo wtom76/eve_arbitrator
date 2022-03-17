@@ -5,8 +5,8 @@
 
 //---------------------------------------------------------------------------------------------------------
 task_load_orders::task_load_orders(long long region_idx, int page)
-	: region_idx_{region_idx}
-	, page_{page}
+	: task{page}
+	, region_idx_{region_idx}
 {
 	assert(region_idx_ >= 0);
 	assert(static_cast<size_t>(region_idx_) < ctx().region_ids().size());
@@ -22,14 +22,14 @@ long long task_load_orders::region_id() const noexcept
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_orders::_apply_raw_data(vector<char>&& data)
 {
+	const bool empty_page{_is_page_empty(data)};
+
+	if (!empty_page)
 	{
-		fstream f{"orders.dump", ios::out|ios::binary|ios::trunc};
-		f.write(data.data(), data.size());
+		ctx().apply_orders(region_id(), nlohmann::json::parse(data.data(), next(data.data(), data.size())).get<vector<order>>());
 	}
 
-	ctx().apply_orders(region_id(), nlohmann::json::parse(data.data(), next(data.data(), data.size())).get<vector<order>>());
-
-	if (page_ < pages_)
+	if (page_ < pages_ && !empty_page)
 	{
 		return make_shared<task_load_orders>(region_idx_, page_ + 1);
 	}

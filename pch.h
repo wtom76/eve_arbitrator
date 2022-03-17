@@ -10,7 +10,11 @@
 #include <cctype>
 #include <cassert>
 #include <utility>
+#include <iterator>
+#include <limits>
 
 #include <curl/curl.h>
 
 using namespace std;
+
+#include "util.h"

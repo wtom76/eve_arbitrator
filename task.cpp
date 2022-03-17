@@ -2,29 +2,8 @@
 #include "task.h"
 
 //---------------------------------------------------------------------------------------------------------
-string trimed_lower_key(string s)
-{
-	static const string g_key_white_space(" \t");
-	{
-		const size_t pos{s.find_first_not_of(g_key_white_space)};
-		if (pos != string::npos)
-		{
-			s.erase(0, pos);
-		}
-	}
-	{
-		const size_t pos{s.find_last_not_of(g_key_white_space)};
-		if (pos != string::npos && pos + 1 != s.size())
-		{
-			s.erase(pos + 1);
-		}
-	}
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
-	return s;
-}
-
-//---------------------------------------------------------------------------------------------------------
-task::task()
+task::task(int page)
+	: page_{page}
 {
 	curl_easy_setopt(eh_.handle(), CURLOPT_HEADERDATA, static_cast<void*>(this));
 	curl_easy_setopt(eh_.handle(), CURLOPT_HEADERFUNCTION, header_callback);
@@ -71,9 +50,12 @@ void task::_header_callback(const char* data, size_t n, size_t /*always 1*/)
 //---------------------------------------------------------------------------------------------------------
 void task::_data_callback(const char* data, size_t n, size_t /*always 1*/)
 {
-	const size_t prev_size{raw_data_.size()};
-	raw_data_.resize(prev_size + n);
-	copy(data, data + n, raw_data_.data() + prev_size);
+	raw_data_.insert(raw_data_.end(), data, data + n);
+}
+//---------------------------------------------------------------------------------------------------------
+bool task::_is_page_empty(const vector<char>& data) const noexcept
+{
+	return data.empty() || (data.size() >= 2 && (data[1] == ']' || data[1] == '}'));
 }
 //---------------------------------------------------------------------------------------------------------
 size_t task::header_callback(char* data, size_t l, size_t n, void* userp)
