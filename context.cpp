@@ -36,8 +36,6 @@ void context::_clear()
 {
 	region_ids_.clear();
 	anomaly_sensor_.clear();
-	type_ids_.clear();
-	type_dict_.clear();
 }
 //---------------------------------------------------------------------------------------------------------
 void context::_run()
@@ -84,22 +82,8 @@ void context::start()
 	_run();
 }
 //---------------------------------------------------------------------------------------------------------
-void context::add_type_ids(const vector<long long>& ids)
-{
-	type_ids_.insert(type_ids_.end(), ids.begin(), ids.end());
-
-	{
-		ofstream f{"dumps/types.dump", ios::binary|ios::trunc};
-		for (long long id : type_ids_)
-		{
-			f << id << '\n';
-		}
-	}
-}
-//---------------------------------------------------------------------------------------------------------
 void context::set_type(type&& t)
 {
-	cout << "type_id: " << t.type_id_ << "\tname: " << t.name_ << endl;
 	type_dict_.emplace(t.type_id_, t);
 }
 //---------------------------------------------------------------------------------------------------------

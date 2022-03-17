@@ -22,7 +22,6 @@ private:
 	shared_ptr<curl_multi>	multi_handle_{nullptr};
 	tasks_t					tasks_;
 	vector<long long>		region_ids_;
-	vector<long long>		type_ids_;
 	type_dict_t				type_dict_;
 	anomaly_sensor			anomaly_sensor_;
 
@@ -40,8 +39,6 @@ public:
 	void start();
 	void add_task(shared_ptr<task> task);
 
-	void add_type_ids(const vector<long long>& ids);
-	const vector<long long>& type_ids() const noexcept { return type_ids_; }
 	void set_type(type&& t);
 	const type& type_by_id(long long type_id) const noexcept;
 

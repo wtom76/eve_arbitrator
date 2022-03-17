@@ -9,8 +9,7 @@ class task_load_type
 {
 // data
 private:
-	long long	type_idx_{0};
-	type		type_;
+	long long	type_id_{0};
 
 // methods
 private:
@@ -19,5 +18,5 @@ private:
 
 public:
 	/// region_idx is an index in context::region_ids() vector. not region_id itself.
-	explicit task_load_type(long long type_idx, int page);
+	explicit task_load_type(long long type_id);
 };

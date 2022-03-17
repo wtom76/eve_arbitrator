@@ -3,7 +3,7 @@
 //---------------------------------------------------------------------------------------------------------
 void from_json(const nlohmann::json& j, order& dst)
 {
-	dst.sell_			= j.at("is_buy_order").get<decltype(dst.sell_)>();
+	dst.sell_			= !j.at("is_buy_order").get<decltype(dst.sell_)>();
 	dst.location_id_	= j.at("location_id").get<decltype(dst.location_id_)>();
 	dst.min_volume_		= j.at("min_volume").get<decltype(dst.min_volume_)>();
 	dst.order_id_		= j.at("order_id").get<decltype(dst.order_id_)>();

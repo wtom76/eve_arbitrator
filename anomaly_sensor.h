@@ -23,6 +23,7 @@ private:
 // methods
 private:
 	void _check_profit(const item_market& market) const;
+	void _load_type(long long type_id) const;
 public:
 	void clear();
 	void apply_orders(const vector<order>& orders);
