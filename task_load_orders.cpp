@@ -55,5 +55,6 @@ shared_ptr<task> task_load_orders::_apply_raw_data(vector<char>&& data)
 	{
 		return make_shared<task_load_orders>(region_idx_ + 1, 1);
 	}
-	return {};
+	ctx().clear_orders();
+	return make_shared<task_load_orders>(0, 1);
 }

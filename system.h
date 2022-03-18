@@ -4,19 +4,17 @@
 namespace universe
 {
 	//---------------------------------------------------------------------------------------------------------
-	/// struct type
+	/// struct system
 	//---------------------------------------------------------------------------------------------------------
-	struct type
+	struct system
 	{
-		long long	type_id_{0};
-		long long	group_id_{0};
-		long long	market_group_id_{0};
-		double		volume_{0.};
+		long long	system_id_{0};
+		double		security_status_{0.};
 		string		name_;
 
-		bool valid() const noexcept { return type_id_ > 0; }
+		bool valid() const noexcept { return system_id_ > 0; }
 	};
 
 	//---------------------------------------------------------------------------------------------------------
-	void from_json(const nlohmann::json& j, type& dst);
+	void from_json(const nlohmann::json& j, system& dst);
 }

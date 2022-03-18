@@ -14,11 +14,13 @@ add_executable(eve_arbitrator
 	"util.h" "util.cpp"
 	"handles.h" "handles.cpp"
 	"type.h" "type.cpp"
+	"system.h" "system.cpp"
 	"order.h" "order.cpp"
 	"task.h" "task.cpp"
 	"task_load_regions.h" "task_load_regions.cpp"
 	"task_load_orders.h" "task_load_orders.cpp"
 	"task_load_type.h" "task_load_type.cpp"
+	"task_load_system.h" "task_load_system.cpp"
 	"anomaly_sensor.h" "anomaly_sensor.cpp"
 	"context.h" "context.cpp"
 	"main.cpp")

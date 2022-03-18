@@ -23,7 +23,7 @@ private:
 // methods
 private:
 	void _check_profit(const item_market& market) const;
-	void _load_type(long long type_id) const;
+	bool _load_info(const order& ord) const;				// type, system, etc. currently will appear on next hit. returns true if info already available
 public:
 	void clear();
 	void apply_orders(const vector<order>& orders);

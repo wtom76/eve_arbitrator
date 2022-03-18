@@ -82,14 +82,14 @@ void context::start()
 	_run();
 }
 //---------------------------------------------------------------------------------------------------------
-void context::set_type(type&& t)
+void context::set_type(universe::type&& t)
 {
 	type_dict_.emplace(t.type_id_, t);
 }
 //---------------------------------------------------------------------------------------------------------
-const type& context::type_by_id(long long type_id) const noexcept
+const universe::type& context::type_by_id(long long type_id) const noexcept
 {
-	static const type null{};
+	static const universe::type null{};
 	const auto type_i{type_dict_.find(type_id)};
 	if (type_i == type_dict_.cend())
 	{
@@ -98,13 +98,28 @@ const type& context::type_by_id(long long type_id) const noexcept
 	return type_i->second;
 }
 //---------------------------------------------------------------------------------------------------------
+void context::set_system(universe::system&& t)
+{
+	system_dict_.emplace(t.system_id_, t);
+}
+//---------------------------------------------------------------------------------------------------------
+const universe::system& context::system_by_id(long long system_id) const noexcept
+{
+	static const universe::system null{};
+	const auto system_i{system_dict_.find(system_id)};
+	if (system_i == system_dict_.cend())
+	{
+		return null;
+	}
+	return system_i->second;
+}
+//---------------------------------------------------------------------------------------------------------
 void context::add_region_ids(const vector<long long>& ids)
 {
 	region_ids_.insert(region_ids_.end(), ids.begin(), ids.end());
 }
 //---------------------------------------------------------------------------------------------------------
-void context::apply_orders(long long region_id, vector<order>&& orders)
+void context::apply_orders(long long, vector<order>&& orders)
 {
-	printf("orders from region %lld. count %lu\n", region_id, orders.size());
 	anomaly_sensor_.apply_orders(orders);
 }
