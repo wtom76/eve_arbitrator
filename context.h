@@ -17,6 +17,7 @@ private:
 public:
 	using type_dict_t = unordered_map<long long /*type_id*/, universe::type>;
 	using system_dict_t = unordered_map<long long /*system_id*/, universe::system>;
+	using region_no_market_t = unordered_map<long long /*region_id*/, int>;
 
 // data
 private:
@@ -27,6 +28,7 @@ private:
 	type_dict_t				type_dict_;
 	system_dict_t			system_dict_;
 	anomaly_sensor			anomaly_sensor_;
+	region_no_market_t		region_no_market_;	// count of times when region had no market
 
 	void _clear();
 	void _run();
@@ -50,6 +52,8 @@ public:
 
 	void add_region_ids(const vector<long long>& ids);
 	const vector<long long>& region_ids() const noexcept { return region_ids_; }
+	void set_region_has_market(long long region_id, bool has);
+	bool region_has_market(long long region_id) const noexcept;
 
 	void apply_orders(long long region_id, vector<order>&& orders);
 	void clear_orders() noexcept { anomaly_sensor_.clear(); }

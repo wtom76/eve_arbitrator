@@ -119,7 +119,31 @@ void context::add_region_ids(const vector<long long>& ids)
 	region_ids_.insert(region_ids_.end(), ids.begin(), ids.end());
 }
 //---------------------------------------------------------------------------------------------------------
-void context::apply_orders(long long, vector<order>&& orders)
+void context::set_region_has_market(long long region_id, bool has)
 {
+	if (has)
+	{
+		region_no_market_.erase(region_id);
+	}
+	else
+	{
+		region_no_market_.emplace(region_id, 0).first->second++;
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+bool context::region_has_market(long long region_id) const noexcept
+{
+	constexpr int threshold{1};
+	const auto iter{region_no_market_.find(region_id)};
+	if (iter != region_no_market_.cend())
+	{
+		return iter->second < threshold;
+	}
+	return true;
+}
+//---------------------------------------------------------------------------------------------------------
+void context::apply_orders(long long /*region_id*/, vector<order>&& orders)
+{
+	//printf("orders from region %lld. count %lu\n", region_id, orders.size());
 	anomaly_sensor_.apply_orders(orders);
 }

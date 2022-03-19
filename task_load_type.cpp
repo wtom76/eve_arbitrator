@@ -13,20 +13,19 @@ task_load_type::task_load_type(long long type_id)
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_type::_apply_raw_data(vector<char>&& data)
 {
-	//{
-	//	ofstream f{"dumps/types/"s + to_string(id_) + ".dump", ios::binary|ios::trunc}; // trunc - hoping for single page
-	//	f.write(data.data(), data.size());
-	//}
-
 	try
 	{
 		ctx().set_type(
 			nlohmann::json::parse(data.data(), next(data.data(), data.size())).get<universe::type>()
 		);
 	}
-	catch (const nlohmann::detail::parse_error& ex)
+	catch (const nlohmann::detail::exception& ex)
 	{
-		cout << "JSON TYPE ERROR: " << ex.what() << endl;
+		{
+			ofstream f{"dumps/types/"s + to_string(id_) + ".dump", ios::binary|ios::trunc}; // trunc - hoping for single page
+			f.write(data.data(), data.size());
+		}
+		cout << "JSON TYPE ERROR. type_id: " << id_ << "\n" << ex.what() << endl;
 	}
 
 	return {};

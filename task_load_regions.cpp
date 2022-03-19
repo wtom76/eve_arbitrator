@@ -13,19 +13,18 @@ task_load_regions::task_load_regions(int page)
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_regions::_apply_raw_data(vector<char>&& data)
 {
-	{
-		ofstream f{"dumps/regions.dump", ios::binary|ios::trunc};
-		f.write(data.data(), data.size());
-	}
-
 	cout << "task_load_regions done" << endl;
 
 	try
 	{
 		ctx().add_region_ids(to_ints(data));
 	}
-	catch (const nlohmann::detail::parse_error& ex)
+	catch (const nlohmann::detail::exception& ex)
 	{
+		{
+			ofstream f{"dumps/regions.dump", ios::binary|ios::trunc};
+			f.write(data.data(), data.size());
+		}
 		cout << "JSON REGIONS ERROR: " << ex.what() << endl;
 	}
 

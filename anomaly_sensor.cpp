@@ -13,32 +13,61 @@ void anomaly_sensor::clear()
 // TODO: consider location availability, qty
 void anomaly_sensor::apply_orders(const vector<order>& orders)
 {
+	int num_info_requested{0};
+
 	for (const order& ord : orders)
 	{
 		//_load_info(ord);
+		bool call_load_info{true};
 
 		item_market& market{item_map_[ord.type_id_]};
 		if (ord.sell_)
 		{
 			if (!market.best_ask_.type_id_ || market.best_ask_.price_ > ord.price_)
 			{
-				market.best_ask_ = ord;
-				if (market.best_bid_.type_id_)
+				if (_load_info(ord))
 				{
-					_check_profit(market);
+					if (ctx().system_by_id(ord.system_id_).security_status_ >= 0.5)
+					{
+						market.best_ask_ = ord;
+						if (market.best_bid_.type_id_)
+						{
+							_check_profit(market);
+						}
+					}
 				}
+				else
+				{
+					++num_info_requested;
+				}
+				call_load_info = false;
 			}
 		}
 		else
 		{
 			if (!market.best_bid_.type_id_ || market.best_bid_.price_ < ord.price_)
 			{
-				market.best_bid_ = ord;
-				if (market.best_ask_.type_id_)
+				if (_load_info(ord))
 				{
-					_check_profit(market);
+					if (ctx().system_by_id(ord.system_id_).security_status_ >= 0.5)
+					{
+						market.best_bid_ = ord;
+						if (market.best_ask_.type_id_)
+						{
+							_check_profit(market);
+						}
+					}
 				}
+				else
+				{
+					++num_info_requested;
+				}
+				call_load_info = false;
 			}
+		}
+		if (call_load_info && num_info_requested < 10 && !_load_info(ord))
+		{
+			++num_info_requested;
 		}
 	}
 }
@@ -61,15 +90,6 @@ bool anomaly_sensor::_load_info(const order& ord) const
 //---------------------------------------------------------------------------------------------------------
 void anomaly_sensor::_check_profit(const item_market& market) const
 {
-	{
-		const bool bid_ready{_load_info(market.best_bid_)};
-		const bool ask_ready{_load_info(market.best_ask_)};
-		if (!bid_ready || !ask_ready)
-		{
-			return;
-		}
-	}
-
 	constexpr double profit_min_rate_{0.10};
 	constexpr long long profit_min_val_{10000000};
 
@@ -87,8 +107,7 @@ void anomaly_sensor::_check_profit(const item_market& market) const
 	const universe::system& bid_system{ctx().system_by_id(market.best_bid_.system_id_)};
 
 	if (profit >= profit_min_val_ &&
-		(static_cast<double>(profit) / market.best_bid_.price_) >= profit_min_rate_ &&
-		bid_system.security_status_ >= 0.5)
+		(static_cast<double>(profit) / market.best_bid_.price_) >= profit_min_rate_)
 	{
 		cout << "PROFIT " << profit / 1000000 << "M\t"
 			 << ctx().type_by_id(market.best_bid_.type_id_).name_ << "\t"

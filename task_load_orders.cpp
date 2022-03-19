@@ -39,22 +39,48 @@ shared_ptr<task> task_load_orders::_apply_raw_data(vector<char>&& data)
 	{
 		try
 		{
+			ctx().set_region_has_market(region_id(), true);
 			ctx().apply_orders(region_id(), nlohmann::json::parse(data.data(), next(data.data(), data.size())).get<vector<order>>());
 		}
-		catch (const nlohmann::detail::parse_error& ex)
+		catch (const nlohmann::detail::exception& ex)
 		{
-			cout << "JSON ORDERS ERROR: " << ex.what() << endl;
+			cout << "JSON ORDERS ERROR. region_id: " << region_id() << "\n" << ex.what() << endl;
 		}
+	}
+	else
+	{
+		ctx().set_region_has_market(region_id(), false);
+		//cout << "region " << region_id() << " has no market" << endl;
 	}
 
 	if (page_ < pages_ && !empty_page)
 	{
 		return make_shared<task_load_orders>(region_idx_, page_ + 1);
 	}
-	if (static_cast<size_t>(region_idx_ + 1) < ctx().region_ids().size())
+
+	long long new_region_idx{region_idx_ + 1};
+	while (static_cast<size_t>(new_region_idx) < ctx().region_ids().size() && !ctx().region_has_market(ctx().region_ids()[new_region_idx]))
 	{
-		return make_shared<task_load_orders>(region_idx_ + 1, 1);
+		++new_region_idx;
 	}
+	
+	if (static_cast<size_t>(new_region_idx) < ctx().region_ids().size())
+	{
+		return make_shared<task_load_orders>(new_region_idx, 1);
+	}
+
 	ctx().clear_orders();
-	return make_shared<task_load_orders>(0, 1);
+
+	new_region_idx = 0;
+	while (static_cast<size_t>(new_region_idx) < ctx().region_ids().size() && !ctx().region_has_market(ctx().region_ids()[new_region_idx]))
+	{
+		++new_region_idx;
+	}
+
+	if (static_cast<size_t>(new_region_idx) < ctx().region_ids().size())
+	{
+		return make_shared<task_load_orders>(new_region_idx, 1);
+	}
+
+	return {};
 }

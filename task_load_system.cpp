@@ -13,20 +13,19 @@ task_load_system::task_load_system(long long system_id)
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_system::_apply_raw_data(vector<char>&& data)
 {
-	//{
-	//	ofstream f{"dumps/systems/"s + to_string(id_) + ".dump", ios::binary|ios::trunc}; // trunc - hoping for single page
-	//	f.write(data.data(), data.size());
-	//}
-
 	try
 	{
 		ctx().set_system(
 			nlohmann::json::parse(data.data(), next(data.data(), data.size())).get<universe::system>()
 		);
 	}
-	catch (const nlohmann::detail::parse_error& ex)
+	catch (const nlohmann::detail::exception& ex)
 	{
-		cout << "JSON SYSTEM ERROR: " << ex.what() << endl;
+		{
+			ofstream f{"dumps/systems/"s + to_string(id_) + ".dump", ios::binary|ios::trunc}; // trunc - hoping for single page
+			f.write(data.data(), data.size());
+		}
+		cout << "JSON SYSTEM ERROR. sytem_id: " << id_ << "\n" << ex.what() << endl;
 	}
 
 	return {};
