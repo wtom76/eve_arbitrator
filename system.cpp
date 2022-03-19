@@ -11,8 +11,9 @@ namespace universe
 		{
 			cout << error << endl;
 		}
-		dst.system_id_		= read_optional(j, "system_id"s, dst.system_id_);
-		dst.security_status_= read_optional(j, "security_status"s, dst.security_status_);
-		dst.name_			= read_optional(j, "name"s, dst.name_);
+		dst.system_id_			= read_optional(j, "system_id"s, dst.system_id_);
+		dst.constellation_id_	= read_optional(j, "constellation_id"s, dst.constellation_id_);
+		dst.security_status_	= read_optional(j, "security_status"s, dst.security_status_);
+		dst.name_				= read_optional(j, "name"s, dst.name_);
 	}
 }

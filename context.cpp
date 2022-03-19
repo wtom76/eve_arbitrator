@@ -142,8 +142,8 @@ bool context::region_has_market(long long region_id) const noexcept
 	return true;
 }
 //---------------------------------------------------------------------------------------------------------
-void context::apply_orders(long long /*region_id*/, vector<order>&& orders)
+void context::apply_orders(long long region_id, vector<order>&& orders)
 {
 	//printf("orders from region %lld. count %lu\n", region_id, orders.size());
-	anomaly_sensor_.apply_orders(orders);
+	anomaly_sensor_.apply_orders(region_id, orders);
 }

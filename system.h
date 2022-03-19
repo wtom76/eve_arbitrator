@@ -9,6 +9,7 @@ namespace universe
 	struct system
 	{
 		long long	system_id_{0};
+		long long	constellation_id_{0};
 		double		security_status_{0.};
 		string		name_;
 
