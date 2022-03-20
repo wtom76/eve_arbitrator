@@ -12,6 +12,7 @@ context& ctx()
 //---------------------------------------------------------------------------------------------------------
 context::context()
 	: multi_handle_{make_shared<curl_multi>()}
+	, db_{"postgresql://eve:eve_pas@localhost:5432/eve"}
 {}
 //---------------------------------------------------------------------------------------------------------
 const string& context::esi_subdir() const noexcept

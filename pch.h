@@ -15,6 +15,7 @@
 #include <limits>
 
 #include <curl/curl.h>
+#include <pqxx/pqxx>	// requires higher C++ version than currently installed
 
 using namespace std;
 

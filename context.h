@@ -24,6 +24,9 @@ private:
 	curl_global				cg_;
 	shared_ptr<curl_multi>	multi_handle_{nullptr};
 	tasks_t					tasks_;
+
+	pqxx::connection		db_;
+
 	vector<long long>		region_ids_;
 	type_dict_t				type_dict_;
 	system_dict_t			system_dict_;

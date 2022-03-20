@@ -3,9 +3,11 @@
 #
 cmake_minimum_required(VERSION 3.8)
 
+set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
+
 project("eve_arbitrator")
 
-# added
 find_package(CURL REQUIRED)
 
 # Add source to this project's executable.
@@ -29,7 +31,7 @@ add_executable(eve_arbitrator
 
 # added
 include_directories(${CURL_INCLUDE_DIR})
-target_link_libraries(eve_arbitrator ${CURL_LIBRARIES})
+target_link_libraries(eve_arbitrator ${CURL_LIBRARIES} pqxx pq)
 
 if(MSVC)
   target_compile_options(eve_arbitrator PRIVATE /W4 /WX)
