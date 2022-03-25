@@ -12,6 +12,8 @@ protected:
 	vector<char>			raw_data_;
 	int						pages_{numeric_limits<int>::max()};
 	int						page_{1};
+	string					received_etag_;
+	struct curl_slist*		http_request_headers_{nullptr};
 
 // methods
 private:
@@ -21,6 +23,7 @@ private:
 	virtual shared_ptr<task> _apply_raw_data(vector<char>&& data) = 0;
 
 protected:
+	long _http_response_code();
 	bool _is_page_empty(const vector<char>& data) const noexcept;
 
 public:

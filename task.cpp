@@ -17,6 +17,7 @@ task::task(int page)
 task::~task()
 {
 	deactivate();
+	curl_slist_free_all(http_request_headers_);
 }
 //---------------------------------------------------------------------------------------------------------
 void task::activate(shared_ptr<curl_multi> multi_handle)
@@ -41,16 +42,27 @@ void task::_header_callback(const char* data, size_t n, size_t /*always 1*/)
 {
 	const char* const data_end{next(data, n)};
 	const auto key_end{find(data, data_end, ':')};
-	const string key{trimed_lower_key({data, key_end})};
+	const string key{trimmed_lower_key({data, key_end})};
 	if (key == "x-pages" && key_end != data_end)
 	{
 		pages_ = stoi(string{next(key_end), data_end});
+	}
+	else if (key == "etag" && key_end != data_end)
+	{
+		received_etag_ = trimmed(string{next(key_end), data_end});
 	}
 }
 //---------------------------------------------------------------------------------------------------------
 void task::_data_callback(const char* data, size_t n, size_t /*always 1*/)
 {
 	raw_data_.insert(raw_data_.end(), data, data + n);
+}
+//---------------------------------------------------------------------------------------------------------
+long task::_http_response_code()
+{
+	long code{0};
+	curl_easy_getinfo(eh_.handle(), CURLINFO_RESPONSE_CODE, &code);
+	return code;
 }
 //---------------------------------------------------------------------------------------------------------
 bool task::_is_page_empty(const vector<char>& data) const noexcept

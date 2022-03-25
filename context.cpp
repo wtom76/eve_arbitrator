@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "context.h"
 #include "task_load_regions.h"
+#include "db.h"
 
 //---------------------------------------------------------------------------------------------------------
 context& ctx()
@@ -12,7 +13,7 @@ context& ctx()
 //---------------------------------------------------------------------------------------------------------
 context::context()
 	: multi_handle_{make_shared<curl_multi>()}
-	, db_{"postgresql://eve:eve_pas@localhost:5432/eve"}
+	, db_{make_unique<db>()}
 {}
 //---------------------------------------------------------------------------------------------------------
 const string& context::esi_subdir() const noexcept
@@ -31,12 +32,6 @@ void context::add_task(shared_ptr<task> task)
 {
 	tasks_.emplace(task->handle(), task);
 	task->activate(multi_handle_);
-}
-//---------------------------------------------------------------------------------------------------------
-void context::_clear()
-{
-	region_ids_.clear();
-	anomaly_sensor_.clear();
 }
 //---------------------------------------------------------------------------------------------------------
 void context::_run()
@@ -77,23 +72,35 @@ void context::_run()
 	cout << "done" << endl;
 }
 //---------------------------------------------------------------------------------------------------------
+long long context::_region_page_hash(long long region_id, int page) const noexcept
+{
+	//return (region_id << 10) | page;
+	return region_id * 1000 + page;
+}
+//---------------------------------------------------------------------------------------------------------
 void context::start()
 {
-	_clear();
 	_run();
 }
 //---------------------------------------------------------------------------------------------------------
 void context::set_type(universe::type&& t)
 {
 	type_dict_.emplace(t.type_id_, t);
+	db_->store(t);
 }
 //---------------------------------------------------------------------------------------------------------
-const universe::type& context::type_by_id(long long type_id) const noexcept
+const universe::type& context::type_by_id(long long type_id) noexcept
 {
 	static const universe::type null{};
 	const auto type_i{type_dict_.find(type_id)};
 	if (type_i == type_dict_.cend())
 	{
+		universe::type loaded{};
+		loaded.type_id_ = type_id;
+		if (db_->load(loaded))
+		{
+			return type_dict_.emplace(loaded.type_id_, move(loaded)).first->second;
+		}
 		return null;
 	}
 	return type_i->second;
@@ -143,8 +150,30 @@ bool context::region_has_market(long long region_id) const noexcept
 	return true;
 }
 //---------------------------------------------------------------------------------------------------------
-void context::apply_orders(long long region_id, vector<order>&& orders)
+void context::apply_orders(long long region_id, int page, vector<order>&& orders)
 {
 	//printf("orders from region %lld. count %lu\n", region_id, orders.size());
-	anomaly_sensor_.apply_orders(region_id, orders);
+	auto& region_orders{orders_by_region_[_region_page_hash(region_id, page)]};
+	region_orders = move(orders);
+	anomaly_sensor_.apply_orders(region_id, region_orders);
+}
+//---------------------------------------------------------------------------------------------------------
+size_t context::apply_cached_orders(long long region_id, int page)
+{
+	auto& region_orders{orders_by_region_[_region_page_hash(region_id, page)]};
+	//printf("cached orders from region %lld. count %lu\n", region_id, region_orders.size());
+	anomaly_sensor_.apply_orders(region_id, region_orders);
+	return region_orders.size();
+}
+//---------------------------------------------------------------------------------------------------------
+void context::set_region_orders_etag(long long region_id, int page, string etag) noexcept
+{
+	//cout << "set etag. region: " << region_id << " page: " << page << " key: " << _region_page_hash(region_id, page) << " etag: " << etag << endl;
+	region_order_etags_[_region_page_hash(region_id, page)] = move(etag);
+}
+//---------------------------------------------------------------------------------------------------------
+string context::region_orders_etag(long long region_id, int page) noexcept
+{
+	//cout << "get etag. region: " << region_id << " page: " << page << " key: " << _region_page_hash(region_id, page) << " etag: " << region_order_etags_[_region_page_hash(region_id, page)] << endl;
+	return region_order_etags_[_region_page_hash(region_id, page)];
 }

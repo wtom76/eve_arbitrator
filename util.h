@@ -55,4 +55,6 @@ inline T read_optional(const nlohmann::json& j, const std::string& field, const 
 	return default_value;
 }
 //---------------------------------------------------------------------------------------------------------
-string trimed_lower_key(string s);
+string trimmed_lower_key(string s);
+//---------------------------------------------------------------------------------------------------------
+string trimmed(string s);

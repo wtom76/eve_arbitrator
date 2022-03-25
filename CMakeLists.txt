@@ -25,7 +25,7 @@ add_executable(eve_arbitrator
 	"task_load_system.h" "task_load_system.cpp"
 	"anomaly_sensor.h" "anomaly_sensor.cpp"
 	"context.h" "context.cpp"
-	"main.cpp")
+	"main.cpp" "db.h" "db.cpp")
 
 # TODO: Add tests and install targets if needed.
 

@@ -47,9 +47,9 @@ vector<long long> to_ints(const vector<char>& data)
 	return result;
 }
 //---------------------------------------------------------------------------------------------------------
-string trimed_lower_key(string s)
+string trimmed(string s)
 {
-	static const string g_key_white_space(" \t");
+	static const string g_key_white_space(" \t\r\n");
 	{
 		const size_t pos{s.find_first_not_of(g_key_white_space)};
 		if (pos != string::npos)
@@ -64,6 +64,12 @@ string trimed_lower_key(string s)
 			s.erase(pos + 1);
 		}
 	}
+	return s;
+}
+//---------------------------------------------------------------------------------------------------------
+string trimmed_lower_key(string s)
+{
+	s = trimmed(move(s));
 	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
 	return s;
 }

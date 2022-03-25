@@ -3,7 +3,14 @@
 
 int main()
 {
-	ctx().start();
+	try
+	{
+		ctx().start();
+	}
+	catch (const std::exception& ex)
+	{
+		cout << ex.what() << endl;
+	}
 
 	return 0;
 }

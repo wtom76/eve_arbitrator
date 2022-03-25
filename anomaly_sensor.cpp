@@ -14,6 +14,9 @@ void anomaly_sensor::clear()
 // TODO: consider location availability, qty
 void anomaly_sensor::apply_orders(long long region_id, const vector<order>& orders)
 {
+	constexpr double min_ask_security{0.5};
+	constexpr double min_bid_security{0.5};
+
 	int num_info_requested{0};
 
 	if (!system_book_checked_ && region_id > 10000002) // The Forge is passed
@@ -31,7 +34,7 @@ void anomaly_sensor::apply_orders(long long region_id, const vector<order>& orde
 			{
 				if (!market.best_ask_.type_id_ || market.best_ask_.price_ > ord.price_)
 				{
-					if (ctx().system_by_id(ord.system_id_).security_status_ >= 0.5)
+					if (ctx().system_by_id(ord.system_id_).security_status_ >= min_ask_security)
 					{
 						market.best_ask_ = ord;
 						if (market.best_bid_.type_id_)
@@ -52,7 +55,7 @@ void anomaly_sensor::apply_orders(long long region_id, const vector<order>& orde
 			{
 				if (!market.best_bid_.type_id_ || market.best_bid_.price_ < ord.price_)
 				{
-					if (ctx().system_by_id(ord.system_id_).security_status_ >= 0.5)
+					if (ctx().system_by_id(ord.system_id_).security_status_ >= min_bid_security)
 					{
 						market.best_bid_ = ord;
 						if (market.best_ask_.type_id_)
@@ -96,8 +99,9 @@ bool anomaly_sensor::_load_info(const order& ord, int& num_info_requested) const
 //---------------------------------------------------------------------------------------------------------
 void anomaly_sensor::_check_best_prices(const item_market& market) const
 {
-	constexpr double profit_min_rate_{0.10};
-	constexpr long long profit_min_val_{10000000};
+	constexpr double profit_min_rate{0.05};
+	constexpr double sales_tax{0.036};
+	constexpr long long profit_min_val{10000000};
 
 	assert(market.best_ask_.type_id_);
 	assert(market.best_ask_.type_id_ == market.best_bid_.type_id_);
@@ -107,12 +111,13 @@ void anomaly_sensor::_check_best_prices(const item_market& market) const
 		return;
 	}
 
-	const long long profit{market.best_bid_.price_ - market.best_ask_.price_};
+	const long long profit{market.best_bid_.price_ - market.best_ask_.price_ -
+		static_cast<long long>(static_cast<double>(market.best_bid_.price_) * sales_tax)};
 
 	const universe::system& ask_system{ctx().system_by_id(market.best_ask_.system_id_)};
 	const universe::system& bid_system{ctx().system_by_id(market.best_bid_.system_id_)};
 
-	if (profit >= profit_min_val_ && (static_cast<double>(profit) / market.best_bid_.price_) >= profit_min_rate_)
+	if (profit >= profit_min_val && (static_cast<double>(profit) / market.best_bid_.price_) >= profit_min_rate)
 	{
 		cout << "HAUL " << profit / 1000000 << "M\t"
 			 << ctx().type_by_id(market.best_bid_.type_id_).name_ << "\t"
