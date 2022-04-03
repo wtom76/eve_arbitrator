@@ -3,6 +3,7 @@
 #include "type.h"
 #include "system.h"
 #include "order.h"
+#include "route.h"
 #include "anomaly_sensor.h"
 
 class task;
@@ -21,6 +22,7 @@ public:
 	using region_no_market_t = unordered_map<long long /*region_id*/, int>;
 	using orders_by_region_t = unordered_map<long long /*region_id << 10 | page*/, vector<order>>;
 	using region_order_etags_t = unordered_map<long long /*region_id << 10 | page*/, string>;
+	using route_dict_t = unordered_map<universe::route::key_t, universe::route>;
 
 // data
 private:
@@ -33,6 +35,7 @@ private:
 	vector<long long>		region_ids_;
 	type_dict_t				type_dict_;
 	system_dict_t			system_dict_;
+	route_dict_t			route_dict_;
 	anomaly_sensor			anomaly_sensor_;
 	region_no_market_t		region_no_market_;	// count of times when region had no market
 	orders_by_region_t		orders_by_region_;
@@ -59,6 +62,9 @@ public:
 
 	void set_system(universe::system&& t);
 	const universe::system& system_by_id(long long system_id) noexcept;
+
+	void set_route(const universe::route& t);
+	const universe::route& route_by_id(universe::route::key_t key) noexcept;
 
 	void add_region_ids(const vector<long long>& ids);
 	const vector<long long>& region_ids() const noexcept { return region_ids_; }

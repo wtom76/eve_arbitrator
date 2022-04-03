@@ -13,19 +13,22 @@ find_package(CURL REQUIRED)
 # Add source to this project's executable.
 add_executable(eve_arbitrator
 	"pch.h"
-	"util.h" "util.cpp"
-	"handles.h" "handles.cpp"
-	"type.h" "type.cpp"
-	"system.h" "system.cpp"
-	"order.h" "order.cpp"
-	"task.h" "task.cpp"
-	"task_load_regions.h" "task_load_regions.cpp"
-	"task_load_orders.h" "task_load_orders.cpp"
-	"task_load_type.h" "task_load_type.cpp"
-	"task_load_system.h" "task_load_system.cpp"
-	"anomaly_sensor.h" "anomaly_sensor.cpp"
-	"context.h" "context.cpp"
-	"main.cpp" "db.h" "db.cpp")
+	"util.h"	"util.cpp"
+	"handles.h"	"handles.cpp"
+	"type.h"	"type.cpp"
+	"system.h"	"system.cpp"
+	"route.h"	"route.cpp"
+	"order.h"	"order.cpp"
+	"task.h"	"task.cpp"
+	"db.h"		"db.cpp"
+	"task_load_regions.h"	"task_load_regions.cpp"
+	"task_load_orders.h"	"task_load_orders.cpp"
+	"task_load_type.h"		"task_load_type.cpp"
+	"task_load_system.h"	"task_load_system.cpp"
+	"task_load_route.h"		"task_load_route.cpp"
+	"anomaly_sensor.h"		"anomaly_sensor.cpp"
+	"context.h"	"context.cpp"
+	"main.cpp")
 
 # TODO: Add tests and install targets if needed.
 

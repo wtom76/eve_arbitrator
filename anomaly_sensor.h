@@ -1,5 +1,6 @@
 #pragma once
 #include "order.h"
+#include "route.h"
 
 //---------------------------------------------------------------------------------------------------------
 /// class anomaly_sensor
@@ -48,6 +49,7 @@ private:
 	void _check_system_books() const;
 	void _check_system_book(long long type_id, const item_market& market) const;
 	bool _load_info(const order& ord, int& num_info_requested) const;				// type, system, etc. currently will appear on next hit. returns true if info already available
+	bool _load_route(universe::route::key_t key, int& num_info_requested) const;	// type, system, etc. currently will appear on next hit. returns true if info already available
 public:
 	void clear();
 	void apply_orders(long long region_id, const vector<order>& orders);

@@ -11,9 +11,14 @@ task_load_orders::task_load_orders(long long region_idx, int page)
 	assert(region_idx_ >= 0);
 	assert(static_cast<size_t>(region_idx_) < ctx().region_ids().size());
 
-	const string url{ctx().esi_subdir() + "/markets/" + to_string(_region_id()) + "/orders/?datasource=" + ctx().esi_datasource() + "&order_type=all&page=" + to_string(page_)};
-	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.c_str());
-	//cout << "url: " << url << endl;
+	stringstream url;
+	url << ctx().esi_subdir() << "/markets/" << _region_id() << "/orders/?datasource=" << ctx().esi_datasource()
+		<< "&order_type=all&page=" << page_;
+	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
+
+	//cout << url.str() << endl;
+	//const string url{ctx().esi_subdir() + "/markets/" + to_string(_region_id()) + "/orders/?datasource=" + ctx().esi_datasource() + "&order_type=all&page=" + to_string(page_)};
+
 	{
 		const string last_etag{ctx().region_orders_etag(_region_id(), page_)};
 		if (!last_etag.empty())
@@ -51,11 +56,11 @@ long long task_load_orders::_region_id(long long region_idx) const noexcept
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_orders::_apply_raw_data(vector<char>&& data)
 {
-	{
-		ofstream f{"dumps/orders.dump", ios::binary|ios::app};
-		f.write(data.data(), data.size());
-		f.close();
-	}
+	//{
+	//	ofstream f{"dumps/orders.dump", ios::binary|ios::app};
+	//	f.write(data.data(), data.size());
+	//	f.close();
+	//}
 
 	switch (_http_response_code())
 	{
@@ -64,13 +69,11 @@ shared_ptr<task> task_load_orders::_apply_raw_data(vector<char>&& data)
 	case 304:
 		if (ctx().apply_cached_orders(_region_id(), page_) > 0 && page_ < pages_)
 		{
-			//cout << "300" << endl;
 			// same region next page
 			return make_shared<task_load_orders>(region_idx_, page_ + 1);
 		}
 		break;
 	case 200:
-		//cout << "200 etag: " << received_etag_ << endl;
 		ctx().set_region_orders_etag(_region_id(), page_, received_etag_);
 		if (_is_page_empty(data))
 		{

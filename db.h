@@ -5,6 +5,7 @@ namespace universe
 {
 	class type;
 	class system;
+	class route;
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -22,4 +23,6 @@ public:
 	bool load(universe::type& v);
 	void store(const universe::system& v);
 	bool load(universe::system& v);
+	void store(const universe::route& v);
+	bool load(universe::route& v);
 };

@@ -3,6 +3,7 @@
 #include "context.h"
 #include "task_load_type.h"
 #include "task_load_system.h"
+#include "task_load_route.h"
 
 //---------------------------------------------------------------------------------------------------------
 void anomaly_sensor::clear()
@@ -37,7 +38,8 @@ void anomaly_sensor::apply_orders(long long region_id, const vector<order>& orde
 					if (ctx().system_by_id(ord.system_id_).security_status_ >= min_ask_security)
 					{
 						market.best_ask_ = ord;
-						if (market.best_bid_.type_id_)
+						if (market.best_bid_.type_id_ &&
+							_load_route({market.best_ask_.system_id_, market.best_bid_.system_id_}, num_info_requested))
 						{
 							_check_best_prices(market);
 						}
@@ -58,7 +60,8 @@ void anomaly_sensor::apply_orders(long long region_id, const vector<order>& orde
 					if (ctx().system_by_id(ord.system_id_).security_status_ >= min_bid_security)
 					{
 						market.best_bid_ = ord;
-						if (market.best_ask_.type_id_)
+						if (market.best_ask_.type_id_ &&
+							_load_route({market.best_ask_.system_id_, market.best_bid_.system_id_}, num_info_requested))
 						{
 							_check_best_prices(market);
 						}
@@ -79,7 +82,7 @@ bool anomaly_sensor::_load_info(const order& ord, int& num_info_requested) const
 	if (!ctx().type_by_id(ord.type_id_).valid())
 	{
 		avaiable = false;
-		if (num_info_requested < 50)
+		if (num_info_requested < 30)
 		{
 			++num_info_requested;
 			ctx().add_task(make_shared<task_load_type>(ord.type_id_));
@@ -88,13 +91,27 @@ bool anomaly_sensor::_load_info(const order& ord, int& num_info_requested) const
 	if (!ctx().system_by_id(ord.system_id_).valid())
 	{
 		avaiable = false;
-		if (num_info_requested < 50)
+		if (num_info_requested < 30)
 		{
 			++num_info_requested;
 			ctx().add_task(make_shared<task_load_system>(ord.system_id_));
 		}
 	}
 	return avaiable;
+}
+//---------------------------------------------------------------------------------------------------------
+bool anomaly_sensor::_load_route(universe::route::key_t key, int& num_info_requested) const
+{
+	if (!ctx().route_by_id(key).valid())
+	{
+		if (num_info_requested < 30)
+		{
+			++num_info_requested;
+			ctx().add_task(make_shared<task_load_route>(key));
+		}
+		return false;
+	}
+	return true;
 }
 //---------------------------------------------------------------------------------------------------------
 void anomaly_sensor::_check_best_prices(const item_market& market) const
@@ -116,18 +133,24 @@ void anomaly_sensor::_check_best_prices(const item_market& market) const
 		std::min(market.best_bid_.volume_remain_, market.best_ask_.volume_remain_)
 	};
 
-	const universe::system& ask_system{ctx().system_by_id(market.best_ask_.system_id_)};
-	const universe::system& bid_system{ctx().system_by_id(market.best_bid_.system_id_)};
-
 	if (profit >= profit_min_val && (static_cast<double>(profit) / market.best_bid_.price_) >= profit_min_rate)
 	{
-		cout << "HAUL " << profit / 1000000 << "M\t"
-			 << ctx().type_by_id(market.best_bid_.type_id_).name_ << "\t"
-			 << ask_system.name_ << " (" << setprecision(2) << ask_system.security_status_ << ")\t"
-			 << "ask: " << market.best_ask_.price_ << "\t"
-			 << bid_system.name_ << " (" << setprecision(2) << bid_system.security_status_ << ")\t"
-			 << "bid: " << market.best_bid_.price_ << "\t"
-			 << "qty: " << min(market.best_bid_.volume_remain_, market.best_ask_.volume_remain_)
+		const universe::type& type{ctx().type_by_id(market.best_bid_.type_id_)};
+		const universe::system& ask_system{ctx().system_by_id(market.best_ask_.system_id_)};
+		const universe::system& bid_system{ctx().system_by_id(market.best_bid_.system_id_)};
+		const universe::route& route{ctx().route_by_id({market.best_ask_.system_id_, market.best_bid_.system_id_})};
+
+		const long long min_qty{min(market.best_bid_.volume_remain_, market.best_ask_.volume_remain_)};
+		cout << "H" << setw(5) << profit / 1000000 << "m"
+			 << "  <" << setw(2) << route.jumps_num_ - 1 << "> "
+			 << ask_system.name_ << " (" << setprecision(2) << ask_system.security_status_ << ")"
+			 << "\task: " << market.best_ask_.price_ << " x " << market.best_ask_.volume_remain_ << "\t"
+			 << bid_system.name_ << " (" << setprecision(2) << bid_system.security_status_ << ")"
+			 << "\tbid: " << market.best_bid_.price_ << " x " << market.best_bid_.volume_remain_ << "\t"
+			 << type.name_
+			 << " x " << min_qty
+			 << " [" << fixed << setprecision(1) << type.packaged_volume_ * min_qty << " m3]"
+			 << " {" << market.best_ask_.price_ * min_qty << " isk}"
 			 << endl;
 	}
 }

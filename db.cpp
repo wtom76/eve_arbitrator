@@ -2,6 +2,7 @@
 #include "db.h"
 #include "type.h"
 #include "system.h"
+#include "route.h"
 
 //---------------------------------------------------------------------------------------------------------
 db::db()
@@ -11,13 +12,19 @@ db::db()
 		"INSERT INTO type VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING;");
 
 	c_.prepare("load_type",
-		"SELECT group_id, market_group_id, volume, name FROM type WHERE id = $1");
+		"SELECT group_id, market_group_id, packaged_volume, name FROM type WHERE id = $1");
 
 	c_.prepare("store_system",
 		"INSERT INTO system VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING;");
 
 	c_.prepare("load_system",
 		"SELECT security_status, constellation_id, name FROM system WHERE id = $1");
+
+	c_.prepare("store_route",
+		"INSERT INTO route VALUES ($1, $2, $3) ON CONFLICT DO NOTHING;");
+
+	c_.prepare("load_route",
+		"SELECT distance FROM route WHERE from_system_id = $1 AND to_system_id = $2");
 }
 //---------------------------------------------------------------------------------------------------------
 void db::store(const universe::type& v)
@@ -29,7 +36,7 @@ void db::store(const universe::type& v)
 			v.type_id_,
 			v.group_id_,
 			v.market_group_id_,
-			v.volume_,
+			v.packaged_volume_,
 			v.name_);
 		t.commit();
 	}
@@ -54,7 +61,7 @@ bool db::load(universe::type& v)
 		}
 		v.group_id_			= r.front()[0].as<decltype(v.group_id_)>();
 		v.market_group_id_	= r.front()[1].as<decltype(v.market_group_id_)>();
-		v.volume_			= r.front()[2].as<decltype(v.volume_)>();
+		v.packaged_volume_	= r.front()[2].as<decltype(v.packaged_volume_)>();
 		v.name_				= r.front()[3].as<decltype(v.name_)>();
 	}
 	catch (const std::exception& ex)
@@ -101,7 +108,47 @@ bool db::load(universe::system& v)
 	}
 	catch (const std::exception& ex)
 	{
-		cout << "Failed to load type. " << ex.what() << endl;
+		cout << "Failed to load system. " << ex.what() << endl;
+	}
+	return true;
+}
+//---------------------------------------------------------------------------------------------------------
+void db::store(const universe::route& v)
+{
+	try
+	{
+		pqxx::work t{c_};
+		t.exec_prepared("store_route",
+			v.system_ids_.first,
+			v.system_ids_.second,
+			v.jumps_num_);
+		t.commit();
+	}
+	catch (const std::exception& ex)
+	{
+		cout << "Failed to store route. " << ex.what() << endl;
+	}
+}
+//---------------------------------------------------------------------------------------------------------
+bool db::load(universe::route& v)
+{
+	assert(v.from_system_id() > 0);
+	assert(v.to_system_id() > 0);
+	try
+	{
+		pqxx::work t{c_};
+		pqxx::result r{t.exec_prepared("load_route", v.from_system_id(), v.to_system_id())};
+		t.commit();
+		if (r.empty())
+		{
+			v.jumps_num_ = 0;
+			return false;
+		}
+		v.jumps_num_ = r.front()[0].as<decltype(v.jumps_num_)>();
+	}
+	catch (const std::exception& ex)
+	{
+		cout << "Failed to load route. " << ex.what() << endl;
 	}
 	return true;
 }

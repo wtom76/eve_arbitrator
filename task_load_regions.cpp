@@ -7,8 +7,12 @@
 task_load_regions::task_load_regions(int page)
 	: task{page}
 {
-	const string url{ctx().esi_subdir() + "/universe/regions/?datasource=" + ctx().esi_datasource()};
-	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.c_str());
+	stringstream url;
+	url << ctx().esi_subdir() << "/universe/regions/?datasource=" << ctx().esi_datasource();
+	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
+
+	//cout << url.str() << endl;
+	//const string url{ctx().esi_subdir() + "/universe/regions/?datasource=" + ctx().esi_datasource()};
 }
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_regions::_apply_raw_data(vector<char>&& data)

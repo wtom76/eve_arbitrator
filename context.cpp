@@ -95,6 +95,12 @@ void context::set_system(universe::system&& t)
 	db_->store(t);
 }
 //---------------------------------------------------------------------------------------------------------
+void context::set_route(const universe::route& t)
+{
+	route_dict_.emplace(t.system_ids_, t);
+	db_->store(t);
+}
+//---------------------------------------------------------------------------------------------------------
 const universe::type& context::type_by_id(long long type_id) noexcept
 {
 	static const universe::type null{};
@@ -123,6 +129,23 @@ const universe::system& context::system_by_id(long long system_id) noexcept
 		if (db_->load(loaded))
 		{
 			return system_dict_.emplace(loaded.system_id_, move(loaded)).first->second;
+		}
+		return null;
+	}
+	return system_i->second;
+}
+//---------------------------------------------------------------------------------------------------------
+const universe::route& context::route_by_id(universe::route::key_t key) noexcept
+{
+	static const universe::route null{};
+	universe::route::norm(key);
+	const auto system_i{route_dict_.find(key)};
+	if (system_i == route_dict_.cend())
+	{
+		universe::route loaded{key};
+		if (loaded.zero() || db_->load(loaded))
+		{
+			return route_dict_.emplace(loaded.system_ids_, move(loaded)).first->second;
 		}
 		return null;
 	}

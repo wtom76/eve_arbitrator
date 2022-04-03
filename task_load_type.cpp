@@ -7,8 +7,12 @@ task_load_type::task_load_type(long long type_id)
 	: task{0}
 	, id_{type_id}
 {
-	const string url{ctx().esi_subdir() + "/universe/types/" + to_string(id_) + "?datasource=" + ctx().esi_datasource() + "&language=en"};
-	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.c_str());
+	stringstream url;
+	url << ctx().esi_subdir() << "/universe/types/" << id_ << "?datasource=" << ctx().esi_datasource() << "&language=en";
+	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
+	cout << url.str() << endl;
+
+	//const string url{ctx().esi_subdir() + "/universe/types/" + to_string(id_) + "?datasource=" + ctx().esi_datasource() + "&language=en"};
 }
 //---------------------------------------------------------------------------------------------------------
 shared_ptr<task> task_load_type::_apply_raw_data(vector<char>&& data)
