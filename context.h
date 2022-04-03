@@ -58,7 +58,7 @@ public:
 	const universe::type& type_by_id(long long type_id) noexcept;
 
 	void set_system(universe::system&& t);
-	const universe::system& system_by_id(long long system_id) const noexcept;
+	const universe::system& system_by_id(long long system_id) noexcept;
 
 	void add_region_ids(const vector<long long>& ids);
 	const vector<long long>& region_ids() const noexcept { return region_ids_; }

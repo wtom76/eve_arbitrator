@@ -99,7 +99,7 @@ bool anomaly_sensor::_load_info(const order& ord, int& num_info_requested) const
 //---------------------------------------------------------------------------------------------------------
 void anomaly_sensor::_check_best_prices(const item_market& market) const
 {
-	constexpr double profit_min_rate{0.05};
+	constexpr double profit_min_rate{0.00};
 	constexpr double sales_tax{0.036};
 	constexpr long long profit_min_val{10000000};
 
@@ -111,8 +111,10 @@ void anomaly_sensor::_check_best_prices(const item_market& market) const
 		return;
 	}
 
-	const long long profit{market.best_bid_.price_ - market.best_ask_.price_ -
-		static_cast<long long>(static_cast<double>(market.best_bid_.price_) * sales_tax)};
+	const long long profit{(market.best_bid_.price_ - market.best_ask_.price_ -
+		static_cast<long long>(static_cast<double>(market.best_bid_.price_) * sales_tax)) *
+		std::min(market.best_bid_.volume_remain_, market.best_ask_.volume_remain_)
+	};
 
 	const universe::system& ask_system{ctx().system_by_id(market.best_ask_.system_id_)};
 	const universe::system& bid_system{ctx().system_by_id(market.best_bid_.system_id_)};

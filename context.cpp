@@ -89,6 +89,12 @@ void context::set_type(universe::type&& t)
 	db_->store(t);
 }
 //---------------------------------------------------------------------------------------------------------
+void context::set_system(universe::system&& t)
+{
+	system_dict_.emplace(t.system_id_, t);
+	db_->store(t);
+}
+//---------------------------------------------------------------------------------------------------------
 const universe::type& context::type_by_id(long long type_id) noexcept
 {
 	static const universe::type null{};
@@ -106,17 +112,18 @@ const universe::type& context::type_by_id(long long type_id) noexcept
 	return type_i->second;
 }
 //---------------------------------------------------------------------------------------------------------
-void context::set_system(universe::system&& t)
-{
-	system_dict_.emplace(t.system_id_, t);
-}
-//---------------------------------------------------------------------------------------------------------
-const universe::system& context::system_by_id(long long system_id) const noexcept
+const universe::system& context::system_by_id(long long system_id) noexcept
 {
 	static const universe::system null{};
 	const auto system_i{system_dict_.find(system_id)};
 	if (system_i == system_dict_.cend())
 	{
+		universe::system loaded{};
+		loaded.system_id_ = system_id;
+		if (db_->load(loaded))
+		{
+			return system_dict_.emplace(loaded.system_id_, move(loaded)).first->second;
+		}
 		return null;
 	}
 	return system_i->second;
