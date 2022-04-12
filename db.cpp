@@ -3,6 +3,7 @@
 #include "type.h"
 #include "system.h"
 #include "route.h"
+#include "agent.h"
 
 //---------------------------------------------------------------------------------------------------------
 db::db()
@@ -25,6 +26,9 @@ db::db()
 
 	c_.prepare("load_route",
 		"SELECT distance FROM route WHERE from_system_id = $1 AND to_system_id = $2");
+
+	c_.prepare("load_agent",
+		"select a.name, s.name, s.id from agent as a inner join system as s on a.system = s.name");
 }
 //---------------------------------------------------------------------------------------------------------
 void db::store(const universe::type& v)
@@ -149,6 +153,28 @@ bool db::load(universe::route& v)
 	catch (const std::exception& ex)
 	{
 		cout << "Failed to load route. " << ex.what() << endl;
+	}
+	return true;
+}
+//---------------------------------------------------------------------------------------------------------
+bool db::load(vector<universe::agent>& v)
+{
+	v.clear();
+	try
+	{
+		pqxx::work t{c_};
+		pqxx::result r{t.exec_prepared("load_agent")};
+		t.commit();
+		v.reserve(r.size());
+		for (const auto& rec : r)
+		{
+			v.emplace_back(rec[0].as<string>(), rec[1].as<string>(), rec[2].as<long long>());
+			cout << v.back().name_ << " " << v.back().system_ << " " << v.back().system_id_ << endl;
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		cout << "Failed to load agent. " << ex.what() << endl;
 	}
 	return true;
 }

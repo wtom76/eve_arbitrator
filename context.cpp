@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "context.h"
 #include "task_load_regions.h"
+#include "task_load_route.h"
 #include "db.h"
 
 //---------------------------------------------------------------------------------------------------------
@@ -14,7 +15,8 @@ context& ctx()
 context::context()
 	: multi_handle_{make_shared<curl_multi>()}
 	, db_{make_unique<db>()}
-{}
+{
+}
 //---------------------------------------------------------------------------------------------------------
 const string& context::esi_subdir() const noexcept
 {
@@ -36,6 +38,7 @@ void context::add_task(shared_ptr<task> task)
 //---------------------------------------------------------------------------------------------------------
 void context::_run()
 {
+	db_->load(agent_dict_);
 	add_task(make_shared<task_load_regions>(1));
 
 	while (!tasks_.empty())
@@ -206,4 +209,26 @@ string context::region_orders_etag(long long region_id, int page) noexcept
 {
 	//cout << "get etag. region: " << region_id << " page: " << page << " key: " << _region_page_hash(region_id, page) << " etag: " << region_order_etags_[_region_page_hash(region_id, page)] << endl;
 	return region_order_etags_[_region_page_hash(region_id, page)];
+}
+//---------------------------------------------------------------------------------------------------------
+const universe::agent* context::nearest_agent(universe::route& route)
+{
+	assert(route.to_system_id() > 0);
+	const universe::agent* nearest{nullptr};
+	route.jumps_num_ = 0;
+	for (const universe::agent& a : agent_dict_)
+	{
+		universe::route::key_t key{universe::route::key(a.system_id_, route.to_system_id())};
+		const universe::route& agent_route{route_by_id(key)};
+		if (!agent_route.valid())
+		{
+			add_task(make_shared<task_load_route>(key));
+		}
+		else if (!nearest || route.jumps_num_ > agent_route.jumps())
+		{
+			nearest = &a;
+			route = agent_route;
+		}
+	}
+	return nearest;
 }

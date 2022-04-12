@@ -10,7 +10,9 @@ task_load_type::task_load_type(long long type_id)
 	stringstream url;
 	url << ctx().esi_subdir() << "/universe/types/" << id_ << "?datasource=" << ctx().esi_datasource() << "&language=en";
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
+#if defined PRINT_URLS
 	cout << url.str() << endl;
+#endif
 
 	//const string url{ctx().esi_subdir() + "/universe/types/" + to_string(id_) + "?datasource=" + ctx().esi_datasource() + "&language=en"};
 }

@@ -18,6 +18,17 @@ namespace universe
 		}
 	}
 	//---------------------------------------------------------------------------------------------------------
+	route::route(long long from_system_id, long long to_system_id)
+		: route{key(from_system_id, to_system_id)}
+	{}
+	//---------------------------------------------------------------------------------------------------------
+	route::key_t route::key(long long from_system_id, long long to_system_id) noexcept
+	{
+		key_t key{from_system_id, to_system_id};
+		norm(key);
+		return key;
+	}
+	//---------------------------------------------------------------------------------------------------------
 	void route::norm(key_t& key) noexcept
 	{
 		if (key.first > key.second)

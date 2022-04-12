@@ -3,9 +3,10 @@
 
 namespace universe
 {
-	class type;
-	class system;
-	class route;
+	struct type;
+	struct system;
+	struct route;
+	struct agent;
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -25,4 +26,6 @@ public:
 	bool load(universe::system& v);
 	void store(const universe::route& v);
 	bool load(universe::route& v);
+
+	bool load(vector<universe::agent>& v);
 };

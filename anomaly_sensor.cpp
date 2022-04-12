@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "anomaly_sensor.h"
 #include "context.h"
+#include "agent.h"
 #include "task_load_type.h"
 #include "task_load_system.h"
 #include "task_load_route.h"
@@ -139,18 +140,21 @@ void anomaly_sensor::_check_best_prices(const item_market& market) const
 		const universe::system& ask_system{ctx().system_by_id(market.best_ask_.system_id_)};
 		const universe::system& bid_system{ctx().system_by_id(market.best_bid_.system_id_)};
 		const universe::route& route{ctx().route_by_id({market.best_ask_.system_id_, market.best_bid_.system_id_})};
+		universe::route agent_route;
+		agent_route.system_ids_.second = market.best_ask_.system_id_;
+		const universe::agent* agent{ctx().nearest_agent(agent_route)};
 
 		const long long min_qty{min(market.best_bid_.volume_remain_, market.best_ask_.volume_remain_)};
 		cout << "H" << setw(5) << profit / 1000000 << "m"
-			 << "  <" << setw(2) << route.jumps_num_ - 1 << "> "
-			 << ask_system.name_ << " (" << setprecision(2) << ask_system.security_status_ << ")"
-			 << "\task: " << market.best_ask_.price_ << " x " << market.best_ask_.volume_remain_ << "\t"
-			 << bid_system.name_ << " (" << setprecision(2) << bid_system.security_status_ << ")"
-			 << "\tbid: " << market.best_bid_.price_ << " x " << market.best_bid_.volume_remain_ << "\t"
-			 << type.name_
-			 << " x " << min_qty
+			 << "  <" << setw(2) << route.jumps_num_ - 1 << ">"
+			 << " " << type.name_ << " x " << min_qty
 			 << " [" << fixed << setprecision(1) << type.packaged_volume_ * min_qty << " m3]"
-			 << " {" << market.best_ask_.price_ * min_qty << " isk}"
+			 << "\t" << ask_system.name_ << " (" << setprecision(2) << ask_system.security_status_ << ")"
+			 << "\t" << bid_system.name_ << " (" << setprecision(2) << bid_system.security_status_ << ")"
+			 << "\task: " << market.best_ask_.price_ << " x " << market.best_ask_.volume_remain_
+			 << "\tbid: " << market.best_bid_.price_ << " x " << market.best_bid_.volume_remain_
+			 << "\t{" << market.best_ask_.price_ * min_qty << " isk}"
+			 << " " << (agent ? agent->name_ : ""s) << " <" << agent_route.jumps_num_ - 1 << ">"
 			 << endl;
 	}
 }

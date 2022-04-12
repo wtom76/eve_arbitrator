@@ -4,6 +4,7 @@
 #include "system.h"
 #include "order.h"
 #include "route.h"
+#include "agent.h"
 #include "anomaly_sensor.h"
 
 class task;
@@ -23,6 +24,7 @@ public:
 	using orders_by_region_t = unordered_map<long long /*region_id << 10 | page*/, vector<order>>;
 	using region_order_etags_t = unordered_map<long long /*region_id << 10 | page*/, string>;
 	using route_dict_t = unordered_map<universe::route::key_t, universe::route>;
+	using agent_dict_t = vector<universe::agent>;
 
 // data
 private:
@@ -36,6 +38,7 @@ private:
 	type_dict_t				type_dict_;
 	system_dict_t			system_dict_;
 	route_dict_t			route_dict_;
+	agent_dict_t			agent_dict_;
 	anomaly_sensor			anomaly_sensor_;
 	region_no_market_t		region_no_market_;	// count of times when region had no market
 	orders_by_region_t		orders_by_region_;
@@ -77,6 +80,9 @@ public:
 	size_t apply_cached_orders(long long region_id, int page);
 	void set_region_orders_etag(long long region_id, int page, string etag) noexcept;
 	string region_orders_etag(long long region_id, int page) noexcept;
+
+	// route.to_system_id() should contain dest system
+	const universe::agent* nearest_agent(universe::route& route);
 };
 
 //---------------------------------------------------------------------------------------------------------

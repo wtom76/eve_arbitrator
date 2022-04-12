@@ -16,7 +16,6 @@ task_load_orders::task_load_orders(long long region_idx, int page)
 		<< "&order_type=all&page=" << page_;
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
 
-	//cout << url.str() << endl;
 	//const string url{ctx().esi_subdir() + "/markets/" + to_string(_region_id()) + "/orders/?datasource=" + ctx().esi_datasource() + "&order_type=all&page=" + to_string(page_)};
 
 	{
@@ -24,7 +23,6 @@ task_load_orders::task_load_orders(long long region_idx, int page)
 		if (!last_etag.empty())
 		{
 			_fill_etag_header(last_etag);
-			//cout << etag_header_ << endl;
 			http_request_headers_ = curl_slist_append(http_request_headers_, etag_header_);
 			curl_easy_setopt(eh_.handle(), CURLOPT_HTTPHEADER, http_request_headers_);
 		}
@@ -117,6 +115,7 @@ shared_ptr<task> task_load_orders::_next_region()
 	}
 
 	// start from first region
+	cout << ':' << endl;
 	ctx().clear_orders();
 
 	new_region_idx = 0;

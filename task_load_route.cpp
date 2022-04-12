@@ -15,7 +15,9 @@ task_load_route::task_load_route(const universe::route::key_t& key)
 		<< "/?datasource=" << ctx().esi_datasource() << "&flag=secure";
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
 
+#if defined PRINT_URLS
 	cout << url.str() << endl;
+#endif
 	//const string url{ctx().esi_subdir() + "/route/" + to_string(route_.from_system_id_) + '/' + to_string(route_.to_system_id_) + "/?datasource=" + ctx().esi_datasource() + "&flag=secure"};
 }
 //---------------------------------------------------------------------------------------------------------

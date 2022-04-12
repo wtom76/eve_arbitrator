@@ -19,6 +19,7 @@ add_executable(eve_arbitrator
 	"system.h"	"system.cpp"
 	"route.h"	"route.cpp"
 	"order.h"	"order.cpp"
+	"agent.h"	"agent.cpp"
 	"task.h"	"task.cpp"
 	"db.h"		"db.cpp"
 	"task_load_regions.h"	"task_load_regions.cpp"

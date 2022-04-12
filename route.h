@@ -1,5 +1,4 @@
 #pragma once
-#include "json.hpp"
 
 namespace universe
 {
@@ -16,7 +15,9 @@ namespace universe
 		route() = default;
 		// will sort system_id's
 		route(key_t key);
+		route(long long from_system_id, long long to_system_id);
 
+		static key_t key(long long from_system_id, long long to_system_id) noexcept;
 		static void norm(key_t& key) noexcept;
 		long long from_system_id() const noexcept { return system_ids_.first; }
 		long long to_system_id() const noexcept { return system_ids_.second; }
@@ -24,6 +25,7 @@ namespace universe
 		bool valid() const noexcept { return from_system_id() != 0; }
 		// read from ESI response raw data
 		void read(const vector<char>& data);
+		long long jumps() const noexcept { return jumps_num_; }
 	};
 }
 

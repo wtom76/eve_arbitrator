@@ -11,7 +11,6 @@ task_load_regions::task_load_regions(int page)
 	url << ctx().esi_subdir() << "/universe/regions/?datasource=" << ctx().esi_datasource();
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
 
-	//cout << url.str() << endl;
 	//const string url{ctx().esi_subdir() + "/universe/regions/?datasource=" + ctx().esi_datasource()};
 }
 //---------------------------------------------------------------------------------------------------------

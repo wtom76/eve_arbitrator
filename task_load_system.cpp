@@ -10,7 +10,9 @@ task_load_system::task_load_system(long long system_id)
 	stringstream url;
 	url << ctx().esi_subdir() << "/universe/systems/" << id_ << "?datasource=" << ctx().esi_datasource() << "&language=en";
 	curl_easy_setopt(eh_.handle(), CURLOPT_URL, url.str().c_str());
+#if defined PRINT_URLS
 	cout << url.str() << endl;
+#endif
 
 	//const string url{ctx().esi_subdir() + "/universe/systems/" + to_string(id_) + "?datasource=" + ctx().esi_datasource() + "&language=en"};
 }
