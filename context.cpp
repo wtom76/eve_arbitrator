@@ -214,11 +214,12 @@ string context::region_orders_etag(long long region_id, int page) noexcept
 const universe::agent* context::nearest_agent(universe::route& route)
 {
 	assert(route.to_system_id() > 0);
+	const long long to_system_id{route.to_system_id()};
 	const universe::agent* nearest{nullptr};
 	route.jumps_num_ = 0;
 	for (const universe::agent& a : agent_dict_)
 	{
-		universe::route::key_t key{universe::route::key(a.system_id_, route.to_system_id())};
+		universe::route::key_t key{universe::route::key(a.system_id_, to_system_id)};
 		const universe::route& agent_route{route_by_id(key)};
 		if (!agent_route.valid())
 		{

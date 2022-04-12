@@ -17,7 +17,7 @@ void anomaly_sensor::clear()
 void anomaly_sensor::apply_orders(long long region_id, const vector<order>& orders)
 {
 	constexpr double min_ask_security{0.5};
-	constexpr double min_bid_security{0.5};
+	constexpr double min_bid_security{0.0};
 
 	int num_info_requested{0};
 
