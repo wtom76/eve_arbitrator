@@ -28,7 +28,7 @@ db::db()
 		"SELECT distance FROM route WHERE from_system_id = $1 AND to_system_id = $2");
 
 	c_.prepare("load_agent",
-		"select a.name, s.name, s.id from agent as a inner join system as s on a.system = s.name");
+		"select a.name, a.account, s.name, s.id from agent as a inner join system as s on a.system = s.name");
 }
 //---------------------------------------------------------------------------------------------------------
 void db::store(const universe::type& v)
@@ -168,8 +168,8 @@ bool db::load(vector<universe::agent>& v)
 		v.reserve(r.size());
 		for (const auto& rec : r)
 		{
-			v.emplace_back(rec[0].as<string>(), rec[1].as<string>(), rec[2].as<long long>());
-			cout << v.back().name_ << " " << v.back().system_ << " " << v.back().system_id_ << endl;
+			v.emplace_back(rec[0].as<string>(), rec[1].as<string>(), rec[2].as<string>(), rec[3].as<long long>());
+			cout << v.back().name_ << " '" << v.back().account_ << "' " << v.back().system_ << " " << v.back().system_id_ << endl;
 		}
 	}
 	catch (const std::exception& ex)

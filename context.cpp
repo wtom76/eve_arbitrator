@@ -77,8 +77,8 @@ void context::_run()
 //---------------------------------------------------------------------------------------------------------
 long long context::_region_page_hash(long long region_id, int page) const noexcept
 {
-	//return (region_id << 10) | page;
-	return region_id * 1000 + page;
+	return (region_id << 10) | page;
+	//return region_id * 1000 + page;
 }
 //---------------------------------------------------------------------------------------------------------
 void context::start()
@@ -188,14 +188,14 @@ void context::apply_orders(long long region_id, int page, vector<order>&& orders
 	//printf("orders from region %lld. count %lu\n", region_id, orders.size());
 	auto& region_orders{orders_by_region_[_region_page_hash(region_id, page)]};
 	region_orders = move(orders);
-	anomaly_sensor_.apply_orders(region_id, region_orders);
+	anomaly_sensor_.apply_orders(region_orders);
 }
 //---------------------------------------------------------------------------------------------------------
 size_t context::apply_cached_orders(long long region_id, int page)
 {
 	auto& region_orders{orders_by_region_[_region_page_hash(region_id, page)]};
 	//printf("cached orders from region %lld. count %lu\n", region_id, region_orders.size());
-	anomaly_sensor_.apply_orders(region_id, region_orders);
+	anomaly_sensor_.apply_orders(region_orders);
 	return region_orders.size();
 }
 //---------------------------------------------------------------------------------------------------------
