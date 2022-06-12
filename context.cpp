@@ -20,7 +20,8 @@ context::context()
 //---------------------------------------------------------------------------------------------------------
 const string& context::esi_subdir() const noexcept
 {
-	static string str{"https://esi.evetech.net/dev"};
+	//static string str{"https://esi.evetech.net/dev"};
+	static string str{"https://esi.evetech.net/latest"};
 	return str;
 }
 //---------------------------------------------------------------------------------------------------------

@@ -28,7 +28,7 @@ db::db()
 		"SELECT distance FROM route WHERE from_system_id = $1 AND to_system_id = $2");
 
 	c_.prepare("load_agent",
-		"select a.name, a.account, s.name, s.id from agent as a inner join system as s on a.system = s.name");
+		"select a.name, a.account, s.name, s.id from agent as a inner join system as s on a.system = s.name order by a.account, a.name");
 }
 //---------------------------------------------------------------------------------------------------------
 void db::store(const universe::type& v)
